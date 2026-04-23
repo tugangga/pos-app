@@ -39,9 +39,25 @@ class KeranjangController extends Controller
             'kode' => 'required|max:100|min:5',
         ]);
 
-        dd($validated);
+        $cekKeranjang = Keranjang::where('kode', $validated['kode'])->get();
+        $produk = Produk::where('kode', $validated['kode'])->get();
 
-        Keranjang::create($validated);
+
+        $validated['namabrg'] = $produk[0]->namabrg;
+        $validated['hjual'] = $produk[0]->hjual;
+        $validated['hbeli'] = $produk[0]->hbeli;
+
+
+        if ($cekKeranjang->isEmpty()) {
+            $validated['qtyjual'] = 1;
+            $validated['total'] = $produk[0]->hjual;
+            Keranjang::create($validated);
+        } else {
+            $validated['qtyjual'] = $cekKeranjang[0]->qtyjual + 1;
+            $validated['total'] = $cekKeranjang[0]->hjual * $validated['qtyjual'];
+            Keranjang::where('kode', $validated['kode'])->update($validated);
+        }
+
         return redirect('/kasir/jualan/create');
     }
 

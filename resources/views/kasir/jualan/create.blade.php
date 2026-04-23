@@ -108,14 +108,16 @@
               <input type="hidden" name="kode" value="{{ $produk->kode }}">
               <button type="submit" href="" class="w-full text-left cursor-pointer">
                 <div class="">
-                  <img src="{{ asset('storage/images/produk/'.$produk->gambar) }}"  alt="sepatu" class="aspect-square object-center" >
+                  <div class="flex justify-center">
+                    <img src="{{ asset('storage/images/produk/'.$produk->gambar) }}"  alt="sepatu" class="aspect-square object-center" >
+                  </div>
                   <div class="text-xs px-4 pt-4 pb-1">{{ $produk->kode }}</div>
                   <div class="text-xs px-4 pb-1 font-light md:font-normal md:text-sm  ">{{ $produk->namabrg }}</div>
                   <div class="px-4 pb-14 text-blue-500 ">Rp. {{ number_format($produk->hjual,0,',','.') }}</div>
                 </div>
               </button>
             </form>
-            <div class="absolute bg-slate-600 h-12 p-4 w-full bottom-0 right-0 rounded-b-lg overflow-hidden "> 
+            <div class="absolute bg-gray-800 h-12 p-4 w-full bottom-0 right-0 rounded-b-lg overflow-hidden "> 
               <div class=" absolute bottom-2 right-2 ">
                 <div class="flex justify-end gap-4 " x-data="{count:0}">
                   <button class="rounded-full border border-white p-2 text-xl/2 text-white size-8 cursor-pointer" @click="(count==0)?0:count--">-</button>
@@ -141,7 +143,7 @@
         <div class="flex space-x-3 mb-2">
           <div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-indigo-600">
             <div class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">Kode/Barcode:</div>
-            <input id="kode" type="text" name="kode" class="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" />
+            <input id="kode" type="text" name="kode" class="block min-w-0 grow bg-white py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6" autofocus />
           </div>
           <div class="">
             <button type="submit" class="btn-primary">save</button>
@@ -167,9 +169,11 @@
           <table class="table-auto w-full text-sm/normal text-left">
             <thead class="sticky top-0 z-10 bg-gray-200">
               <tr>
-                <th class="px-6 py-3 font-medium ">Kode</th>
-                <th class="px-6 py-3 font-medium">Nama</th>
-                <th class="px-6 py-3 font-medium">Harga</th>
+                <th class="px-6 py-3 font-medium ">Barang</th>
+                {{-- <th class="px-6 py-3 font-medium">Nama</th> --}}
+                <th class="px-6 py-3 font-medium text-right">Harga</th>
+                <th class="px-6 py-3 font-medium text-right">Qty</th>
+                <th class="px-6 py-3 font-medium text-right">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -183,12 +187,19 @@
                         <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
                       </svg>
                   </span>
-                  <span class="ps-4">
-                    {{ $keranjang->kode }}
-                  </span>
+                  <div class="">
+                    <div class="ps-4">
+                      {{ $keranjang->kode }}
+                    </div>
+                    <div class="ps-4">
+                      {{ $keranjang->namabrg }}
+                    </div>
+                  </div>
                 </td>
-                <td class="px-6 py-3 font-light ">{{ $keranjang->namabrg }}</td>
-                <td class="px-6 py-3 font-light">{{ $keranjang->hjual }}</td>
+                {{-- <td class="px-6 py-3 font-light ">{{ $keranjang->namabrg }}</td> --}}
+                <td class="px-6 py-3 font-light text-right">{{ number_format($keranjang->hjual,0,',','.') }}</td>
+                <td class="px-6 py-3 font-light text-right">{{ number_format($keranjang->qtyjual,0,',','.') }}</td>
+                <td class="px-6 py-3 font-light text-right">{{ number_format($keranjang->total,0,',','.') }}</td>
               </tr>
               @endforeach
             </tbody>

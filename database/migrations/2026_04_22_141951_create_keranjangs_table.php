@@ -21,6 +21,7 @@ return new class extends Migration
             $table->integer('hbeli')->default(0);
             $table->integer('hjual')->default(0);
             $table->integer('qtyjual')->default(0);
+            $table->integer('total')->default(0);
             $table->timestamps();
         });
     }
