@@ -15,9 +15,7 @@ class ProdukController extends Controller
     public function index()
     {
         // $produks = Produk::latest()->get();
-        $produks = Produk::orderBy('kategori', 'asc')
-            ->orderBy('namabrg', 'asc')
-            ->latest()
+        $produks = Produk::latest()
             ->paginate(10);
         return view('admin.produk.index', compact('produks'));
     }

@@ -23,8 +23,8 @@ class ProdukFactory extends Factory
             'namabrg' => fake()->sentence(6),
             'kategori' => 'BEBAS',
             'satuan' => 'PCS',
-            'hbeli' => fake()->numberBetween(10000, 30000),
-            'hjual' => fake()->numberBetween(30000, 80000),
+            'hbeli' => floor(fake()->numberBetween(10000, 40000) / 1000) * 1000,
+            'hjual' => floor(fake()->numberBetween(50000, 80000) / 1000) * 1000,
             'qawal' => fake()->randomNumber(2, true),
             'gambar' => fake()->randomElements(['headset.jpg', 'jam.jpg', 'sepatu.jpg'])[0],
         ];

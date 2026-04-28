@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Keranjang;
 use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class KeranjangController extends Controller
 {
@@ -20,13 +21,17 @@ class KeranjangController extends Controller
 
     public function create()
     {
+        $sekarang = date("Y-m-d");
         $produks = Produk::all();
-        $keranjangs = Keranjang::all();
+        $keranjangs = Keranjang::whereDate('created_at', $sekarang)->latest()->get();
+        $totalHarga = Keranjang::sum(DB::raw('qty * hjual'));
+        $totalItems = Keranjang::sum(DB::raw('qty'));
+
         // $keranjangs = Keranjang::where('');
 
         return view(
             'kasir.jualan.create',
-            compact('produks', 'keranjangs')
+            compact('produks', 'keranjangs', 'totalHarga', 'totalItems')
 
         );
     }
@@ -35,26 +40,33 @@ class KeranjangController extends Controller
     public function addkeranjang(Request $request)
     {
         //
+        // dd($request);
         $validated = $request->validate([
-            'kode' => 'required|max:100|min:5',
+            'kode' => 'required|max:100|min:5|exists:produks',
+            'qty' => 'required|gte:1',
+        ], [
+            'kode.exists' => 'kode is not found'
         ]);
 
+
+        $kode = $validated['kode'];
+        $produk = Produk::where('kode', $kode)->first();
+
         $cekKeranjang = Keranjang::where('kode', $validated['kode'])->get();
-        $produk = Produk::where('kode', $validated['kode'])->get();
+        // dd($cekKeranjang);
 
 
-        $validated['namabrg'] = $produk[0]->namabrg;
-        $validated['hjual'] = $produk[0]->hjual;
-        $validated['hbeli'] = $produk[0]->hbeli;
+        $validated['namabrg'] = $produk->namabrg;
+        $validated['hjual'] = $produk->hjual;
+        $validated['hbeli'] = $produk->hbeli;
 
 
         if ($cekKeranjang->isEmpty()) {
-            $validated['qtyjual'] = 1;
-            $validated['total'] = $produk[0]->hjual;
+            $validated['total'] = $produk->hjual * $validated['qty'];
             Keranjang::create($validated);
         } else {
-            $validated['qtyjual'] = $cekKeranjang[0]->qtyjual + 1;
-            $validated['total'] = $cekKeranjang[0]->hjual * $validated['qtyjual'];
+            $validated['qty'] += $cekKeranjang[0]->qty;
+            $validated['total'] = $cekKeranjang[0]->hjual * $validated['qty'];
             Keranjang::where('kode', $validated['kode'])->update($validated);
         }
 
@@ -66,7 +78,7 @@ class KeranjangController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        dd($request);
     }
 
     /**
@@ -98,6 +110,8 @@ class KeranjangController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $keranjang = Keranjang::find($id);
+        $keranjang->delete();
+        return redirect('/kasir/jualan/create')->with('sukses', 'Produk ' . $keranjang->namabrg . ' berhasil dihapus !');
     }
 }

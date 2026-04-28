@@ -15,6 +15,8 @@ Route::get('/coba', function () {
 Route::get('/kasir/jualan/create', [KeranjangController::class, 'create']);
 Route::get('/kasir/jualan', [KeranjangController::class, 'index']);
 Route::post('/kasir/keranjang', [KeranjangController::class, 'addkeranjang']);
+Route::delete('/kasir/keranjang/{id}', [KeranjangController::class, 'destroy'])->name('hapus.keranjang');
+Route::post('/kasir/bayar', [KeranjangController::class, 'store'])->name('kasir.bayar');
 
 
 
