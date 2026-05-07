@@ -14,10 +14,10 @@ class ProdukController extends Controller
 
     public function index()
     {
-        // $produks = Produk::latest()->get();
+        $title = 'Produk';
         $produks = Produk::latest()
             ->paginate(10);
-        return view('admin.produk.index', compact('produks'));
+        return view('dashboard.produk.index', compact('produks', 'title'));
     }
 
 
@@ -25,7 +25,7 @@ class ProdukController extends Controller
     {
         $dataSatuans = Satuan::all();
         $dataKategoris = Kategori::all();
-        return view('admin.produk.create', compact('dataSatuans', 'dataKategoris'));
+        return view('dashboard.produk.create', compact('dataSatuans', 'dataKategoris'));
     }
 
 
@@ -83,7 +83,7 @@ class ProdukController extends Controller
         ]);
 
 
-        return redirect('/produk/tambah')->with('sukses', 'Data produk ' . $request->namabrg . ' berhasil disimpan!');
+        return redirect('/dashboard/produk/tambah')->with('sukses', 'Data produk ' . $request->namabrg . ' berhasil disimpan!');
     }
 
     /**
@@ -99,7 +99,7 @@ class ProdukController extends Controller
         $dataSatuans = Satuan::all();
         $dataKategoris = Kategori::all();
         $produk = Produk::where('kode', $kode)->first();
-        return view('admin.produk.edit', compact('produk', 'dataSatuans', 'dataKategoris'));
+        return view('dashboard.produk.edit', compact('produk', 'dataSatuans', 'dataKategoris'));
     }
 
     /**
@@ -130,7 +130,7 @@ class ProdukController extends Controller
         $validated['namabrg'] = strtoupper($validated['namabrg']);
 
         Produk::where('id', $id)->update($validated);
-        return redirect('/produk')->with('sukses', 'Data produk ' . $request->kode . 'berhasil diperbaharui !');
+        return redirect('/dashboard/produk')->with('sukses', 'Data produk ' . $request->kode . 'berhasil diperbaharui !');
     }
 
     public function destroy(string $id)
@@ -139,6 +139,6 @@ class ProdukController extends Controller
         $namaProduk = $produk->namabrg;
         // Produk::destroy($id);
         $produk->delete();
-        return redirect('/produk')->with('sukses', 'Produk ' . $namaProduk . ' berhasil dihapus !');
+        return redirect('/dashboard/produk')->with('sukses', 'Produk ' . $namaProduk . ' berhasil dihapus !');
     }
 }

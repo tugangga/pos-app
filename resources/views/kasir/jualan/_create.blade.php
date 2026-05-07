@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}" type="image/x-icon">
-    
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite('resources/css/app.css')
     
     <script
@@ -83,7 +83,7 @@
 
   <div class="flex justify-between w-full grow ">
     <div class="flex gap-2">
-      <a href="{{ route('produk') }}" class="btn-red">Tutup Kasir</a>
+      <a href="/produk" class="btn-red">Tutup Kasir</a>
       <div class="flex items-center rounded-md bg-white pl-3 outline-1 -outline-offset-1 outline-gray-300 has-[input:focus-within]:outline-2 has-[input:focus-within]:-outline-offset-2 has-[input:focus-within]:outline-indigo-600">
         <div class="shrink-0 text-base text-gray-500 select-none sm:text-sm/6">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
@@ -169,10 +169,12 @@
     
     
     {{-- right side --}}
-    <div class="col-span-5 p-2 grid h-[calc(100vh-72px)] grid-rows-[46px_1fr_54px_72px] border border-gray-200" > 
+    <div x-data="keranjangForm" 
+      class="col-span-5 p-2 grid h-[calc(100vh-72px)] grid-rows-[46px_1fr_54px_72px] border border-gray-200" > 
       
         <div class="">
-          <form action="/kasir/keranjang" method="POST" >
+          {{-- <form action="/kasir/keranjang" method="POST" > --}}
+          <form @submit.prevent="submitData" >
             @csrf
             <div class="flex space-x-1 mb-2 ">
               <div class="">
@@ -196,7 +198,17 @@
               </div>
 
               <div class="">
-                <button type="submit" class="btn-white">Add</button>
+                <button type="submit" class="btn-white" :disabled="loading">
+                  <span x-show="!loading">Add</span>
+                  <span x-show="loading">Menyimpan...</span>
+                </button>
+                {{-- tambahan ajax --}}
+                <template x-if="message">
+                  <div :class="status === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+                  class="mt-4 p-2 rounded" x-text="message">
+                </div>
+              </template>
+              {{-- tambahan ajax --}}
               </div>
             </div>
           </form>
@@ -216,9 +228,11 @@
           </div>
           @else
 
-          <div class="relative h-full overflow-x-auto overflow-y-auto bg-white border border-gray-200/20">
+          <div x-html="tableHTML" class="relative h-full overflow-x-auto overflow-y-auto bg-white border border-gray-200/20">
             @include('kasir.jualan.table')
+            {{-- table --}}
             {{-- table dibuat partial --}}
+            {{-- end of table --}}
           </div>
           @endif
         </div>
@@ -327,7 +341,59 @@
 </main>
 
 
+<script>
+  document.addEventListener("alpine:init", () => {
+    Alpine.data("keranjangForm", () => ({
+      kode: "",
+      qty: 1,
+      loading: false,
+      message: "",
+      status: "",
+      tableHTML: "",
+     
 
+        async submitData() {
+            this.loading = true;
+            this.message = "";
+            
+            try {
+                const response = await fetch("/kasir/keranjang", {
+                    method: "POST",
+                    headers: {
+                              "Content-Type": "application/json",
+                              "Accept": "application/json", // WAJIB: Agar Laravel mengembalikan JSON jika error
+                              "X-Requested-With": "XMLHttpRequest",
+                              "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').value,
+                            },
+                              body: JSON.stringify({ 
+                              kode: this.kode,
+                              qty: this.qty,
+                            }),
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    this.status = "success";
+                    this.message = result.message;
+                    // Reset input
+                    this.kode = "";
+                    this.qty = 1;
+                    this.tableHTML = result.html;
+                } else {
+                    this.status = "error";
+                    this.message = result.message || "Terjadi kesalahan.";
+                }
+            } catch (error) {
+                this.status = "error";
+                this.message = "Koneksi ke server terputus.";
+            } finally {
+                this.loading = false;
+            }
+        },
+    }));
+  });
+</script>
 
 </body>
 </html>

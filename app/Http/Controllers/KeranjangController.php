@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 class KeranjangController extends Controller
 {
 
-    public function kasir() {}
+
 
     public function index()
     {
@@ -21,26 +21,26 @@ class KeranjangController extends Controller
 
     public function create()
     {
+
+        // $produksInitial = '';
         $sekarang = date("Y-m-d");
         $produks = Produk::all();
         $keranjangs = Keranjang::whereDate('created_at', $sekarang)->latest()->get();
-        $totalHarga = Keranjang::sum(DB::raw('qty * hjual'));
+        $totalHarga = Keranjang::whereDate('created_at', $sekarang)->sum(DB::raw('qty * hjual'));
         $totalItems = Keranjang::sum(DB::raw('qty'));
 
         // $keranjangs = Keranjang::where('');
 
         return view(
             'kasir.jualan.create',
-            compact('produks', 'keranjangs', 'totalHarga', 'totalItems')
+            compact('keranjangs', 'totalHarga', 'totalItems', 'produks')
 
         );
     }
 
-
     public function addkeranjang(Request $request)
     {
-        //
-        // dd($request);
+
         $validated = $request->validate([
             'kode' => 'required|max:100|min:5|exists:produks',
             'qty' => 'required|gte:1',
@@ -53,14 +53,11 @@ class KeranjangController extends Controller
         $produk = Produk::where('kode', $kode)->first();
 
         $cekKeranjang = Keranjang::where('kode', $validated['kode'])->get();
-        // dd($cekKeranjang);
-
 
         $validated['namabrg'] = $produk->namabrg;
         $validated['hjual'] = $produk->hjual;
         $validated['hbeli'] = $produk->hbeli;
-
-
+        // 
         if ($cekKeranjang->isEmpty()) {
             $validated['total'] = $produk->hjual * $validated['qty'];
             Keranjang::create($validated);
@@ -113,5 +110,60 @@ class KeranjangController extends Controller
         $keranjang = Keranjang::find($id);
         $keranjang->delete();
         return redirect('/kasir/jualan/create')->with('sukses', 'Produk ' . $keranjang->namabrg . ' berhasil dihapus !');
+    }
+
+    public function addkeranjang_ajax(Request $request)
+    {
+
+        $validated = $request->validate([
+            'kode' => 'required|max:100|min:5|exists:produks',
+            'qty' => 'required|gte:1',
+        ], [
+            'kode.exists' => 'kode is not found'
+        ]);
+
+
+        $kode = $validated['kode'];
+        $produk = Produk::where('kode', $kode)->first();
+
+        // tambahan ajax
+        // if (!$produk) {
+        //     return response()->json([
+        //         'message' => 'Gagal! Kode barang tidak terdaftar di sistem.'
+        //     ], 404);
+        // }
+        // tambahan ajax
+
+
+        $cekKeranjang = Keranjang::where('kode', $validated['kode'])->get();
+
+        $validated['namabrg'] = $produk->namabrg;
+        $validated['hjual'] = $produk->hjual;
+        $validated['hbeli'] = $produk->hbeli;
+
+        // 
+
+        // 
+        if ($cekKeranjang->isEmpty()) {
+            $validated['total'] = $produk->hjual * $validated['qty'];
+            Keranjang::create($validated);
+        } else {
+            $validated['qty'] += $cekKeranjang[0]->qty;
+            $validated['total'] = $cekKeranjang[0]->hjual * $validated['qty'];
+            Keranjang::where('kode', $validated['kode'])->update($validated);
+        }
+
+        // return redirect('/kasir/jualan/create');
+
+        // tambahan ajax
+        $sekarang = date("Y-m-d");
+        $keranjangs = Keranjang::whereDate('created_at', $sekarang)->latest()->get();
+
+        return response()->json([
+            'message' => "Berhasil! Data {$produk->namabrg} telah disimpan.",
+            'html' => view('/kasir/jualan/table', compact('keranjangs'))->render()
+        ], 200);
+
+        // tambahan ajax
     }
 }

@@ -20,7 +20,7 @@
         @endif
     </div>
 
-    <form method="POST" action="/produk">
+    <form method="POST" action="{{ route('store.produk') }}">
         @csrf
         <!-- <div class="space-y-12"> -->
             <div class="border-b border-gray-900/10 pb-6 mb-4">
@@ -44,7 +44,7 @@
                             <span class="hidden lg:block text-xs text-slate-400">Nama produk</span>
                         </label>
                         <div class="mt-2">
-                            <input id="barang" type="text" name="namabrg" value="{{ old('namabrg') }}" class="input-form-control uppercase"/>
+                            <input id="barang" type="text" name="namabrg" value="{{ old('namabrg') }}" required class="input-form-control uppercase"/>
                         </div>
                         @error('namabrg')
                             <div class="text-xs text-red-900 font-light">{{ $message }}</div>
@@ -225,7 +225,7 @@
             {{-- end of quantity produk --}}
             
             <div class="flex justify-end space-x-3">
-                <a href="/produk" class="btn-white" tabindex="-1">Cancel</a>
+                <a href="{{ route('produk') }}" class="btn-white" tabindex="-1">Cancel</a>
                 <button type="submit" class="btn-primary ">Save</button>
             </div>
                
